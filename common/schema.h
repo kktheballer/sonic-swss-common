@@ -103,6 +103,8 @@ namespace swss {
 #define PERSISTENT_WATERMARKS_TABLE    "PERSISTENT_WATERMARKS"
 #define USER_WATERMARKS_TABLE          "USER_WATERMARKS"
 
+#define RATES_TABLE                         "RATES"
+
 /***** LOGLEVEL DATABASE *****/
 
 #define DAEMON_TABLE_NAME "DAEMON_TABLE"
@@ -136,6 +138,7 @@ namespace swss {
 #define STATS_MODE_READ_AND_CLEAR     "STATS_MODE_READ_AND_CLEAR"
 #define QUEUE_PLUGIN_FIELD            "QUEUE_PLUGIN_LIST"
 #define PORT_PLUGIN_FIELD             "PORT_PLUGIN_LIST"
+#define RIF_PLUGIN_FIELD              "RIF_PLUGIN_LIST"
 #define PG_PLUGIN_FIELD               "PG_PLUGIN_LIST"
 #define BUFFER_POOL_PLUGIN_FIELD      "BUFFER_POOL_PLUGIN_LIST"
 #define FLEX_COUNTER_STATUS_FIELD     "FLEX_COUNTER_STATUS"
@@ -226,6 +229,16 @@ namespace swss {
 #define CFG_NAT_BINDINGS_TABLE_NAME                 "NAT_BINDINGS"
 #define CFG_NAT_GLOBAL_TABLE_NAME                   "NAT_GLOBAL"
 
+<<<<<<< HEAD
+=======
+#define CFG_STP_GLOBAL_TABLE_NAME                   "STP"
+#define CFG_STP_VLAN_TABLE_NAME                     "STP_VLAN"
+#define CFG_STP_VLAN_PORT_TABLE_NAME                "STP_VLAN_PORT"
+#define CFG_STP_PORT_TABLE_NAME                     "STP_PORT"
+
+#define CFG_RATES_TABLE_NAME                        "RATES"
+
+>>>>>>> 8fce898... [schema] update schema with rates and utilization table names (#330)
 /***** STATE DATABASE *****/
 
 #define STATE_SWITCH_CAPABILITY_TABLE_NAME          "SWITCH_CAPABILITY_TABLE"
