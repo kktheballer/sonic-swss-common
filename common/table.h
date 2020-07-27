@@ -34,11 +34,8 @@ typedef std::map<std::string,TableMap> TableDump;
 
 class TableBase {
 public:
-#ifndef SWIG
-    __attribute__((deprecated))
-#endif
     TableBase(int dbId, const std::string &tableName)
-        : m_tableName(tableName)
+        : m_tableName(tableName), m_dbId(dbId)
     {
         /* Look up table separator for the provided DB */
         auto it = tableNameSeparatorMap.find(dbId);
@@ -54,15 +51,8 @@ public:
         }
     }
 
-    TableBase(const std::string &tableName, const std::string &tableSeparator)
-        : m_tableName(tableName), m_tableSeparator(tableSeparator)
-    {
-        static const std::string legalSeparators = ":|";
-        if (legalSeparators.find(tableSeparator) == std::string::npos)
-            throw std::invalid_argument("Invalid table name separator");
-    }
-
     std::string getTableName() const { return m_tableName; }
+    int getDbId() const { return m_dbId; }
 
     /* Return the actual key name as a combination of tableName<table_separator>key */
     std::string getKeyName(const std::string &key)
@@ -85,6 +75,7 @@ private:
 
     std::string m_tableName;
     std::string m_tableSeparator;
+    int m_dbId;
 };
 
 class TableEntryWritable {
@@ -119,7 +110,7 @@ public:
     /* The default value of pop batch size is 128 */
     static constexpr int DEFAULT_POP_BATCH_SIZE = 128;
 
-    TableConsumable(const std::string &tableName, const std::string &separator, int pri) : TableBase(tableName, separator), RedisSelect(pri) { }
+    TableConsumable(int dbId, const std::string &tableName, int pri) : TableBase(dbId, tableName), RedisSelect(pri) { }
 };
 
 class TableEntryEnumerable {
