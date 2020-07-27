@@ -359,3 +359,4 @@ void ProducerStateTable::apply_temp_view()
 }
 
 }
+

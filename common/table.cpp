@@ -36,7 +36,7 @@ Table::Table(const DBConnector *db, const string &tableName)
 }
 
 Table::Table(RedisPipeline *pipeline, const string &tableName, bool buffered)
-    : TableBase(tableName, SonicDBConfig::getSeparator(pipeline->getDBConnector()))
+    : TableBase(pipeline->getDbId(), tableName)
     , m_buffered(buffered)
     , m_pipeowned(false)
     , m_pipe(pipeline)
@@ -237,3 +237,4 @@ string Table::stripSpecialSym(const string &key)
 
     return key;
 }
+
