@@ -226,8 +226,6 @@ namespace swss {
 #define CFG_NAT_BINDINGS_TABLE_NAME                 "NAT_BINDINGS"
 #define CFG_NAT_GLOBAL_TABLE_NAME                   "NAT_GLOBAL"
 
-<<<<<<< HEAD
-=======
 #define CFG_STP_GLOBAL_TABLE_NAME                   "STP"
 #define CFG_STP_VLAN_TABLE_NAME                     "STP_VLAN"
 #define CFG_STP_VLAN_PORT_TABLE_NAME                "STP_VLAN_PORT"
@@ -235,7 +233,6 @@ namespace swss {
 
 #define CFG_RATES_TABLE_NAME                        "RATES"
 
->>>>>>> 8fce898... [schema] update schema with rates and utilization table names (#330)
 /***** STATE DATABASE *****/
 
 #define STATE_SWITCH_CAPABILITY_TABLE_NAME          "SWITCH_CAPABILITY_TABLE"
