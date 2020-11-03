@@ -10,6 +10,7 @@
 
 #include "common/dbconnector.h"
 #include "common/redisreply.h"
+#include "common/redisapi.h"
 
 using json = nlohmann::json;
 using namespace std;
@@ -112,7 +113,7 @@ bool SonicDBConfig::m_init = false;
 
 constexpr const char *DBConnector::DEFAULT_UNIXSOCKET;
 
-void DBConnector::select(DBConnector *db)
+void DBConnector::select(DBConnector *db) //preserved 201911
 {
     string select("SELECT ");
     select += to_string(db->getDbId());
@@ -126,6 +127,7 @@ DBConnector::~DBConnector()
     redisFree(m_conn);
 }
 
+//preserve 201911 version
 DBConnector::DBConnector(int dbId, const string& hostname, int port,
                          unsigned int timeout) :
     m_dbId(dbId)
@@ -144,6 +146,7 @@ DBConnector::DBConnector(int dbId, const string& hostname, int port,
     select(this);
 }
 
+//preserve 201911 version
 DBConnector::DBConnector(int dbId, const string& unixPath, unsigned int timeout) :
     m_dbId(dbId)
 {
@@ -161,6 +164,7 @@ DBConnector::DBConnector(int dbId, const string& unixPath, unsigned int timeout)
     select(this);
 }
 
+//preserve 201911 version
 DBConnector::DBConnector(const string& dbName, unsigned int timeout, bool isTcpConn) :
     m_dbId(SonicDBConfig::getDbId(dbName))
 {
@@ -198,6 +202,7 @@ int DBConnector::getDbId() const
     return m_dbId;
 }
 
+//201911 preserved but this could be a candidate for taking master version for
 DBConnector *DBConnector::newConnector(unsigned int timeout) const
 {
     if (getContext()->connection_type == REDIS_CONN_TCP)
@@ -239,6 +244,64 @@ string DBConnector::getClientName()
         return "";
     }
 }
+
+//new function from master
+DBConnector::DBConnector(const DBConnector &other) //new function from master
+    : RedisContext(other)
+    , m_dbId(other.m_dbId)
+    , m_namespace(other.m_namespace)
+{
+    select(this);
+}
+
+//new function from master
+DBConnector::DBConnector(int dbId, const RedisContext& ctx)
+    : RedisContext(ctx)
+    , m_dbId(dbId)
+    , m_namespace(EMPTY_NAMESPACE)
+{
+    select(this);
+}
+
+//new function from master
+DBConnector::DBConnector(const string& dbName, unsigned int timeout, bool isTcpConn, const string& netns)
+    : m_dbId(SonicDBConfig::getDbId(dbName, netns))
+    , m_dbName(dbName)
+    , m_namespace(netns)
+{
+    struct timeval tv = {0, (suseconds_t)timeout * 1000};
+
+    if (isTcpConn)
+    {
+        initContext(SonicDBConfig::getDbHostname(dbName, netns).c_str(), SonicDBConfig::getDbPort(dbName, netns), tv);
+    }
+    else
+    {
+        initContext(SonicDBConfig::getDbSock(dbName, netns).c_str(), tv);
+    }
+
+    select(this);
+}
+
+//new function from master
+string DBConnector::getDbName() const
+{
+    return m_dbName;
+}
+
+//new function from master
+void DBConnector::setNamespace(const string& netns)
+{
+    m_namespace = netns;
+}
+
+//new function from master
+string DBConnector::getNamespace() const
+{
+    return m_namespace;
+}
+
+
 
 int64_t DBConnector::del(const string &key)
 {
@@ -401,4 +464,58 @@ shared_ptr<string> DBConnector::blpop(const string &list, int timeout)
     throw runtime_error("GET failed, memory exception");
 }
 
+}
+
+void DBConnector::hmset(const std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>& multiHash)
+{
+    SWSS_LOG_ENTER();
+
+    json j;
+
+    // pack multi hash to json (takes bout 70 ms for 10k to construct)
+    for (const auto& kvp: multiHash)
+    {
+        json o;
+
+        for (const auto &item: kvp.second)
+        {
+            o[std::get<0>(item)] = std::get<1>(item);
+        }
+
+        j[kvp.first] = o;
+    }
+
+    std::string strJson = j.dump();
+
+    RedisCommand command;
+    command.format(
+        "EVALSHA %s 1 %s %s",
+        m_shaRedisMulti.c_str(),
+        strJson.c_str(),
+        "mhset");
+
+    RedisReply r(this, command, REDIS_REPLY_NIL);
+}
+
+void DBConnector::hdel(const std::vector<std::string>& keys)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::array();
+
+    for (const auto& key: keys)
+    {
+        j.push_back(key);
+    }
+
+    std::string strJson = j.dump();
+
+    RedisCommand command;
+    command.format(
+        "EVALSHA %s 1 %s %s",
+        m_shaRedisMulti.c_str(),
+        strJson.c_str(),
+        "mdel");
+
+    RedisReply r(this, command, REDIS_REPLY_NIL);
 }

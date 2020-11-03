@@ -77,6 +77,8 @@ public:
 
     int64_t hdel(const std::string &key, const std::vector<std::string> &fields);
 
+    void hdel(const std::vector<std::string>& keys);
+
     std::unordered_map<std::string, std::string> hgetall(const std::string &key);
 
     template <typename OutputIterator>
@@ -90,6 +92,8 @@ public:
 
     template<typename InputIterator>
     void hmset(const std::string &key, InputIterator start, InputIterator stop);
+
+    void hmset(const std::unordered_map<std::string, std::vector<std::pair<std::string, std::string>>>& multiHash);
 
     std::shared_ptr<std::string> get(const std::string &key);
 
@@ -106,7 +110,10 @@ public:
 private:
     redisContext *m_conn;
     int m_dbId;
-};
+    std::string m_dbName;
+    std::string m_namespace;
+    std::string m_shaRedisMulti; //this line was merged in favor of master
+ };
 
 template<typename OutputIterator>
 void DBConnector::hgetall(const std::string &key, OutputIterator result)
