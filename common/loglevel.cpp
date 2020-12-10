@@ -124,6 +124,8 @@ int main(int argc, char **argv)
 
     if (print)
     {
+        int errorCount = 0;
+
         if (argc != 2)
         {
             exitWithUsage(EXIT_FAILURE, "-p option does not accept other options");
@@ -133,10 +135,7 @@ int main(int argc, char **argv)
         for (const auto& key : keys)
         {
             const auto redis_key = std::string(key).append(":").append(key);
-<<<<<<< HEAD
-            auto level = redisClient.hget(redis_key, DAEMON_LOGLEVEL);
-            std::cout << std::left << std::setw(30) << key << *level << std::endl;
-=======
+
             auto level = db.hget(redis_key, DAEMON_LOGLEVEL);
             if (nullptr == level)
             {
@@ -147,8 +146,10 @@ int main(int argc, char **argv)
             {
                 std::cout << std::left << std::setw(30) << key << *level << std::endl;
             }
->>>>>>> 2b9a00f... Move RedisClient functions into DBConnector (#382)
+
         }
+        if (errorCount > 0)
+            return (EXIT_FAILURE);
         return (EXIT_SUCCESS);
     }
 
